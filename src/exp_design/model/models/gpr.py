@@ -11,7 +11,7 @@ from sklearn.gaussian_process.kernels import (
 from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold, cross_val_predict
 
-from exp_design.model.models import Model
+from exp_design.model.models.base import Model
 
 
 class GPRModel(Model):
