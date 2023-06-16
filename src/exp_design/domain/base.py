@@ -1,5 +1,7 @@
 import numpy as np
 
+from exp_design.parameter.base import ParameterField
+
 
 class AbstractParameterDomain:
     groups = {}

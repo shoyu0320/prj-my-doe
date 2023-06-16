@@ -1,17 +1,12 @@
 import numpy as np
+
 from exp_design.parameter.base import ParameterField
 
 
-class ParameterField:
-    def __init__(self):
-        self.rounding = None
-
-    def generate(self, size: int = 100):
-        raise NotImplementedError()
-
-
 class IntParameterField(ParameterField):
-    def __init__(self, pmin: int, pmax: int, seed: int = 2023, name: str = 'IntParameter'):
+    def __init__(
+        self, pmin: int, pmax: int, seed: int = 2023, name: str = "IntParameter"
+    ):
         self.pmin = pmin
         self.pmax = pmax + 1
         self.seed = seed
@@ -31,7 +26,8 @@ class FloatParameterField(ParameterField):
         pmax: float,
         rounding: int | None = None,
         seed: int = 2023,
-        name: str = 'FloatParameter'):
+        name: str = "FloatParameter",
+    ):
         self.pmin = pmin
         self.pmax = pmax
         self.seed = seed
@@ -41,12 +37,19 @@ class FloatParameterField(ParameterField):
     def generate(self, size: int = 100):
         np.random.seed(self.seed)
         generated_parameters = np.random.rand(size)
-        generated_parameters = generated_parameters * (self.pmax - self.pmin) + self.pmin
+        generated_parameters = (
+            generated_parameters * (self.pmax - self.pmin) + self.pmin
+        )
         return generated_parameters
 
 
 class CategoricalParameterField(IntParameterField):
-    def __init__(self, categories: list[str], seed: int = 2023, name: str = 'CategoricalParameter'):
+    def __init__(
+        self,
+        categories: list[str],
+        seed: int = 2023,
+        name: str = "CategoricalParameter",
+    ):
         self.categories = categories
         self.pmin = 0
         self.pmax = len(categories)
