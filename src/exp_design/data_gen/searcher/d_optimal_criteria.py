@@ -1,6 +1,6 @@
 import numpy as np
 
-from exp_design.searcher.base import ParameterSearcher
+from exp_design.data_gen.searcher.base import ParameterSearcher
 
 
 class DCriteriaParameterSearcher(ParameterSearcher):

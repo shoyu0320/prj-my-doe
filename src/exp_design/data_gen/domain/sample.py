@@ -1,5 +1,5 @@
-from exp_design.domain.base import AbstractParameterDomain
-from exp_design.parameter.simple_parameters import (
+from exp_design.data_gen.domain.base import AbstractParameterDomain
+from exp_design.data_gen.parameter.simple_parameters import (
     CategoricalParameterField,
     FloatParameterField,
     IntParameterField,

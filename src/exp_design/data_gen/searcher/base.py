@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from exp_design.domain.base import AbstractParameterDomain
+from exp_design.data_gen.domain.base import AbstractParameterDomain
 
 
 class ParameterSearcher:

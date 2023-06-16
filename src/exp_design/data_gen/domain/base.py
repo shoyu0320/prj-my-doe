@@ -1,6 +1,6 @@
 import numpy as np
 
-from exp_design.parameter.base import ParameterField
+from exp_design.data_gen.parameter.base import ParameterField
 
 
 class AbstractParameterDomain:
