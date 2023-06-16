@@ -1,4 +1,9 @@
 from exp_design.domain.base import AbstractParameterDomain
+from exp_design.parameter.simple_parameters import (
+    CategoricalParameterField,
+    FloatParameterField,
+    IntParameterField,
+)
 
 
 class Parameters(AbstractParameterDomain):
