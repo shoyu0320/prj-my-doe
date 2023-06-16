@@ -17,8 +17,8 @@ from exp_design.model.sampler.bayes_sampler import (
 def fn(df):
     predesigned_beta = np.array([0.1, 1, 20, 22, 2, 3, 5, 0])
 
-    df_target = (df.values @ predesigned_beta) ** (
-        -np.log(np.abs(df.values + 1)) @ predesigned_beta
+    df_target = (df.values @ predesigned_beta) * (
+        (df.values / 19 + 1) @ predesigned_beta
     ) + np.random.randn(len(df)) * 10
     return df_target
 
