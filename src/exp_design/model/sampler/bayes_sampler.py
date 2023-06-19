@@ -54,11 +54,11 @@ class PIExperimentSampler(ExperimentSamplerBase):
         std = self.model.current_std * self.obj_normalizer.std
         pred = self.obj_normalizer.backward(self.model.current_obj)
 
-        y_max = self.objectives.values.max()
+        y_max = self.objectives.values.max(axis=0)
         delta_y = pred - y_max - self.relaxation * self.obj_normalizer.std
         prob = norm.cdf(delta_y / self.obj_normalizer.std)
         log_prob = np.log(prob + 1)
-        return log_prob
+        return np.sum(log_prob, axis=1)
 
     def calc_sample_fn(self):
         pi = self.calc_prob_of_improve()
@@ -96,7 +96,7 @@ class PTRExperimentSampler(ExperimentSampler):
         parameters: dict[str, Any] = {},
     ):
         super().__init__(model, None, normalizer, parameters)
-        self.target_range = self.parameters.get("target_range", (750.0, 800.0))
+        self.target_range = self.parameters.get("target_range", [(750.0, 800.0)])
         self.dims_lim = [1, np.inf]
 
     def calc_prob_of_target_range(self):
@@ -105,11 +105,17 @@ class PTRExperimentSampler(ExperimentSampler):
         std = self.model.current_std * self.obj_normalizer.std
         pred = self.obj_normalizer.backward(self.model.current_obj)
 
-        y_upper = norm.cdf(self.target_range[1], loc=pred, scale=std)
-        y_lower = norm.cdf(self.target_range[0], loc=pred, scale=std)
-        prob = y_upper - y_lower
-        log_prob = np.log(prob + 1)
-        return log_prob
+        scores = np.zeros_like(pred[:, 0])
+        for obj_idx in range(self.model.obj_idx):
+            target_range = self.target_range[obj_idx]
+            obj_std = std[obj_idx]
+            obj_pred = pred.iloc[:, obj_idx]
+            y_upper = norm.cdf(target_range[1], loc=obj_pred, scale=obj_std)
+            y_lower = norm.cdf(target_range[0], loc=obj_pred, scale=obj_std)
+            prob = y_upper - y_lower
+            log_prob = np.log(prob + 1)
+            scores += log_prob
+        return scores
 
     def calc_sample_fn(self):
         ptr = self.calc_prob_of_target_range()
