@@ -55,7 +55,9 @@ class PIExperimentSampler(ExperimentSamplerBase):
 
         y_max = self.objectives.values.max()
         delta_y = pred - y_max - self.relaxation * self.obj_normalizer.std
-        return norm.cdf(delta_y / self.obj_normalizer.std)
+        prob = norm.cdf(delta_y / self.obj_normalizer.std)
+        log_prob = np.log(prob + 1)
+        return log_prob
 
     def calc_sample_fn(self):
         pi = self.calc_prob_of_improve()
@@ -103,7 +105,9 @@ class PTRExperimentSampler(ExperimentSampler):
 
         y_upper = norm.cdf(self.target_range[1], loc=pred, scale=std)
         y_lower = norm.cdf(self.target_range[0], loc=pred, scale=std)
-        return y_upper - y_lower
+        prob = y_upper - y_lower
+        log_prob = np.log(prob + 1)
+        return log_prob
 
     def calc_sample_fn(self):
         ptr = self.calc_prob_of_target_range()
