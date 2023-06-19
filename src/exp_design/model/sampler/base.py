@@ -24,10 +24,20 @@ class ExperimentSamplerBase:
             normalizer = MinMaxNormalizer
         self.normalizer = normalizer
         self.parameters = parameters
+        self.dims_lim = [1, 1]
+
+    def _check_obj_dims(self, objectives: pd.DataFrame):
+        dims = objectives.shape[1]
+        assert self.dims_lim[0] <= dims <= self.dims_lim[1], (
+            f"The dimension of a target in {self.__class__.__name__} must "
+            f"be in the range of [{self.dims_lim[0]}, {self.dims_lim[1]}]. "
+            f"But, input target has the dimensions of {dims}"
+        )
 
     def set_normalizer(
         self, descriptors: pd.DataFrame, objectives: pd.DataFrame, update: bool = False
     ):
+        self._check_obj_dims(objectives)
         self.descriptors = descriptors.copy()
         self.objectives = objectives.copy()
         if not update:

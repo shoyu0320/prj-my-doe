@@ -46,6 +46,7 @@ class PIExperimentSampler(ExperimentSamplerBase):
     ):
         super().__init__(model, None, normalizer, parameters)
         self.relaxation = self.parameters.get("relaxation", 1e-2)
+        self.dims_lim = [1, np.inf]
 
     def calc_prob_of_improve(self):
         self.model.predict(self.sampler)
@@ -96,6 +97,7 @@ class PTRExperimentSampler(ExperimentSampler):
     ):
         super().__init__(model, None, normalizer, parameters)
         self.target_range = self.parameters.get("target_range", (750.0, 800.0))
+        self.dims_lim = [1, np.inf]
 
     def calc_prob_of_target_range(self):
         self.model.predict(self.sampler)

@@ -41,9 +41,13 @@ class GPRModel(Model):
 
     def calc_kernel_score(self, kernel, desc, obj) -> float:
         model = GaussianProcessRegressor(alpha=0, kernel=kernel)
-        estimated_obj = cross_val_predict(model, desc, obj, cv=self.cv)
-        flattened_obj = np.ndarray.flatten(estimated_obj)
-        score = r2_score(obj, flattened_obj)
+        score = 0
+        for obj_idx in range(obj.shape[1]):
+            estimated_obj = cross_val_predict(
+                model, desc, obj[:, [obj_idx]], cv=self.cv
+            )
+            flattened_obj = np.ndarray.flatten(estimated_obj)
+            score *= np.log(r2_score(obj[:, [obj_idx]], flattened_obj) + 1)
         return score
 
     def optimize(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
