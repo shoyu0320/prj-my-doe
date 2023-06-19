@@ -108,7 +108,7 @@ class PTRExperimentSampler(ExperimentSampler):
         scores = np.zeros_like(pred.shape[0])
         for obj_idx in range(self.model.obj_dims):
             target_range = self.target_range[obj_idx]
-            obj_std = std[obj_idx]
+            obj_std = std[:, obj_idx]
             obj_pred = pred.iloc[:, obj_idx]
             y_upper = norm.cdf(target_range[1], loc=obj_pred, scale=obj_std)
             y_lower = norm.cdf(target_range[0], loc=obj_pred, scale=obj_std)
