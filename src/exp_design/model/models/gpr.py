@@ -47,7 +47,7 @@ class GPRModel(Model):
                 model, desc, obj[:, [obj_idx]], cv=self.cv
             )
             flattened_obj = np.ndarray.flatten(estimated_obj)
-            score *= np.log(r2_score(obj[:, [obj_idx]], flattened_obj) + 1)
+            score += np.log(r2_score(obj[:, [obj_idx]], flattened_obj) + 1)
         return score
 
     def optimize(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
