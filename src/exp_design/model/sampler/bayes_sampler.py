@@ -1,8 +1,11 @@
+from typing import Any
+
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
 from exp_design.model.models.base import Model
+from exp_design.model.sampler.ad_base_sampler import ExperimentSampler
 from exp_design.model.sampler.base import ExperimentSamplerBase
 
 

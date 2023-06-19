@@ -30,7 +30,6 @@ class GPRModel(Model):
     ]
 
     def __init__(self, n_split: int = 10):
-        self.obj_normalizer = obj_normalizer
         self.cv = KFold(n_splits=n_split, random_state=2023, shuffle=True)
         self.best_kernel = self.kernels[0]
         self.model = None
