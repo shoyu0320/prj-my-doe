@@ -1,8 +1,13 @@
 import numpy as np
 import pandas as pd
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import (RBF, ConstantKernel, DotProduct,
-                                              Matern, WhiteKernel)
+from sklearn.gaussian_process.kernels import (
+    RBF,
+    ConstantKernel,
+    DotProduct,
+    Matern,
+    WhiteKernel,
+)
 from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold, cross_val_predict
 
@@ -38,15 +43,19 @@ class GPRModel(Model):
     def calc_kernel_score(self, kernel, desc, obj) -> float:
         model = GaussianProcessRegressor(alpha=0, kernel=kernel)
         score = 0
+        estimated_obj = cross_val_predict(model, desc, obj, cv=self.cv)
+
         for obj_idx in range(obj.shape[1]):
-            cur_obj = obj.iloc[:, [obj_idx]]
-            estimated_obj = cross_val_predict(model, desc, cur_obj, cv=self.cv)
-            flattened_obj = np.ndarray.flatten(estimated_obj)
-            score += np.log(r2_score(cur_obj, flattened_obj) + 1)
+            cur_est = estimated_obj[:, obj_idx]
+            cur_obj = obj.values
+
+            flattened_obj = np.ndarray.flatten(cur_obj)
+            flattened_est = np.ndarray.flatten(cur_est)
+            score += np.log(r2_score(flattened_obj, flattened_est) + 1)
         return score
 
     def optimize(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
-        best_score = 0
+        best_score = -np.inf
         best_kernel = None
         self.obj_dims = objectives.shape[1]
         size = len(self.kernels)
@@ -54,7 +63,7 @@ class GPRModel(Model):
         for index, kernel in enumerate(self.kernels):
             print(f"\r{index + 1}/{size}", end="")
             score = self.calc_kernel_score(kernel, descriptors, objectives)
-            if best_score > score:
+            if best_score < score:
                 best_score = score
                 best_kernel = kernel
         self.best_kernel = best_kernel
@@ -71,6 +80,4 @@ class GPRModel(Model):
         self.current_obj = estimated_obj
         self.current_std = obj_std
         columns = [f"estimated_{i}" for i in range(self.obj_dims)]
-        return pd.DataFrame(
-            estimated_obj, index=descriptors.index, columns=columns
-        )
+        return pd.DataFrame(estimated_obj, index=descriptors.index, columns=columns)
