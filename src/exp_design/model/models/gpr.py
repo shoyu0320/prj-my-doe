@@ -47,7 +47,7 @@ class GPRModel(Model):
 
         for obj_idx in range(obj.shape[1]):
             cur_est = estimated_obj[:, obj_idx]
-            cur_obj = obj.values
+            cur_obj = obj.values[:, obj_idx]
 
             flattened_obj = np.ndarray.flatten(cur_obj)
             flattened_est = np.ndarray.flatten(cur_est)
