@@ -25,11 +25,14 @@ class ExperimentSamplerBase:
         self.normalizer = normalizer
         self.parameters = parameters
 
-    def set_normalizer(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
+    def set_normalizer(
+        self, descriptors: pd.DataFrame, objectives: pd.DataFrame, update: bool = False
+    ):
         self.descriptors = descriptors.copy()
         self.objectives = objectives.copy()
-        self.desc_normalizer = self.normalizer(descriptors)
-        self.obj_normalizer = self.normalizer(objectives)
+        if not update:
+            self.desc_normalizer = self.normalizer(descriptors)
+            self.obj_normalizer = self.normalizer(objectives)
         self.normd_descriptors = self.desc_normalizer.forward(descriptors)
         self.normd_objectives = self.obj_normalizer.forward(objectives)
 
@@ -39,7 +42,7 @@ class ExperimentSamplerBase:
     def fit(
         self, descriptors: pd.DataFrame, objectives: pd.DataFrame, update: bool = False
     ):
-        self.set_normalizer(descriptors, objectives)
+        self.set_normalizer(descriptors, objectives, update)
         if update:
             self.model.fit(self.normd_descriptors, self.normd_objectives)
         else:
@@ -60,7 +63,8 @@ class ExperimentSamplerBase:
         self.sampler_est = (
             self.sampler_est.drop(sample_idx).reset_index().drop("index", axis=1)
         )
-        return self.desc_normalizer.backward(sample)
+        original_sample = self.desc_normalizer.backward(sample)
+        return original_sample
 
     def update(self, descriptor: pd.DataFrame, objective: pd.DataFrame):
         descriptors = (
