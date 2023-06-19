@@ -1,13 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import (
-    RBF,
-    ConstantKernel,
-    DotProduct,
-    Matern,
-    WhiteKernel,
-)
+from sklearn.gaussian_process.kernels import (RBF, ConstantKernel, DotProduct,
+                                              Matern, WhiteKernel)
 from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold, cross_val_predict
 
@@ -35,6 +30,7 @@ class GPRModel(Model):
         self.model = None
         self.current_obj = None
         self.current_std = None
+        self.obj_dims = None
 
     def modeling(self):
         self.model = GaussianProcessRegressor(alpha=0, kernel=self.best_kernel)
@@ -52,6 +48,7 @@ class GPRModel(Model):
     def optimize(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
         best_score = 0
         best_kernel = None
+        self.obj_dims = objectives.shape[1]
         size = len(self.kernels)
 
         for index, kernel in enumerate(self.kernels):
@@ -66,12 +63,14 @@ class GPRModel(Model):
     def fit(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
         if self.model is None:
             self.modeling()
+        self.obj_dims = objectives.shape[1]
         self.model.fit(descriptors, objectives)
 
     def predict(self, descriptors: pd.DataFrame):
         estimated_obj, obj_std = self.model.predict(descriptors, return_std=True)
         self.current_obj = estimated_obj
         self.current_std = obj_std
+        columns = [f"estimated_{i}" for i in range(self.obj_dims)]
         return pd.DataFrame(
-            estimated_obj, index=descriptors.index, columns=["estimated"]
+            estimated_obj, index=descriptors.index, columns=columns
         )
