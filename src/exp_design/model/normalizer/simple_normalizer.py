@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from exp_design.model.normalizer import Normalizer
+from exp_design.model.normalizer.base import Normalizer
 
 
 class Standardizer(Normalizer):
