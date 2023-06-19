@@ -106,7 +106,7 @@ class PTRExperimentSampler(ExperimentSampler):
         pred = self.obj_normalizer.backward(self.model.current_obj)
 
         scores = np.zeros_like(pred[:, 0])
-        for obj_idx in range(self.model.obj_idx):
+        for obj_idx in range(self.model.obj_dims):
             target_range = self.target_range[obj_idx]
             obj_std = std[obj_idx]
             obj_pred = pred.iloc[:, obj_idx]
