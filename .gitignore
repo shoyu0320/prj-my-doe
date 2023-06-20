@@ -5,6 +5,7 @@ __pycache__/
 requirements.txt
 .vscode/*
 notebook/*
+*.DS_store
 
 # C extensions
 *.so

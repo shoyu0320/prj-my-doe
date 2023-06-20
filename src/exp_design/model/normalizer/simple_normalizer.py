@@ -9,20 +9,21 @@ class Standardizer(Normalizer):
         self.mean = base_df.mean(axis=0).values
         self.std = base_df.std(axis=0).values
         zero_std_idx = np.nonzero(self.std == 0)[0]
+        non_zero_std_idx = np.nonzero(self.std)[0]
+        self.std = self.std[non_zero_std_idx]
+        self.mean = self.mean[non_zero_std_idx]
         self.drop_columns = base_df.columns[zero_std_idx]
 
     def forward(self, _df: pd.DataFrame):
         df = _df.copy()
-        df = (df - self.mean) / self.std
-
         # 標準偏差で割ることで標準化するので、標準偏差が０のデータは削除
         df = df.drop(self.drop_columns, axis=1)
+
+        df = (df - self.mean) / self.std
         return df
 
     def backward(self, _df: pd.DataFrame):
         df = _df.copy()
-        # 標準偏差で割ることで標準化するので、標準偏差が０のデータは削除
-        df = df.drop(self.drop_columns, axis=1)
         df = df * self.std + self.mean
         return df
 
