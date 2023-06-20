@@ -79,6 +79,6 @@ class GPRModel(Model):
         estimated_obj, obj_std = self.model.predict(descriptors, return_std=True)
         columns = [f"target_{i}" for i in range(self.obj_dims)]
         self.current_obj = pd.DataFrame(estimated_obj, columns=columns)
-        self.current_std = obj_std
+        self.current_std = pd.DataFrame(obj_std, columns=columns)
         columns = [f"estimated_{i}" for i in range(self.obj_dims)]
         return pd.DataFrame(estimated_obj, index=descriptors.index, columns=columns)

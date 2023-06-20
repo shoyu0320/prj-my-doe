@@ -21,6 +21,8 @@ class Standardizer(Normalizer):
 
     def backward(self, _df: pd.DataFrame):
         df = _df.copy()
+        # 標準偏差で割ることで標準化するので、標準偏差が０のデータは削除
+        df = df.drop(self.drop_columns, axis=1)
         df = df * self.std + self.mean
         return df
 
