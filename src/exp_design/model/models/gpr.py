@@ -43,7 +43,9 @@ class GPRModel(Model):
     def calc_kernel_score(self, kernel, desc, obj) -> float:
         model = GaussianProcessRegressor(alpha=0, kernel=kernel)
         score = 0
-        estimated_obj = cross_val_predict(model, desc, obj, cv=self.cv)
+        estimated_obj = cross_val_predict(model, desc, obj, cv=self.cv).reshape(
+            -1, obj.shape[1]
+        )
 
         for obj_idx in range(obj.shape[1]):
             cur_est = estimated_obj[:, obj_idx]
