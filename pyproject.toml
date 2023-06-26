@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "exp_design"
-version = "0.0.18"
+version = "0.0.19"
 authors = [
     {name = "shoyu", email = "shoh.k.19940320@gmail.com"},
 ]
@@ -38,7 +38,8 @@ dependencies = [
 	"tomli==2.0.1",
 	"tzdata==2023.3",
 	"scikit-learn==1.2.2",
-	"scipy==1.10.1"
+	"scipy==1.10.1",
+	"lightgbm==3.3.5"
 ]
 
 [project.optional-dependencies]
