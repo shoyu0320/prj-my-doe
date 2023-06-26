@@ -29,12 +29,14 @@ class EnsembleModel(Model):
             model.fit(descriptors, objectives)
 
     def predict(self, descriptors: pd.DataFrame):
-        estimated_obj = np.zeros_like((len(descriptors), self.obj_dims))
+        estimated_obj = np.zeros((len(descriptors), self.obj_dims), dtype=np.float64)
         for model in self.model:
             estimated_obj += model.predict(descriptors).values
 
         columns = [f"target_{i}" for i in range(self.obj_dims)]
-        self.current_obj = pd.DataFrame(estimated_obj, columns=columns)
+        self.current_obj = pd.DataFrame(
+            estimated_obj / len(self.model), columns=columns
+        )
         self.current_std = pd.DataFrame(
             np.zeros_like(self.current_obj.values), columns=columns
         )
