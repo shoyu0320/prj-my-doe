@@ -86,81 +86,79 @@ class GPRModel(Model):
         return pd.DataFrame(estimated_obj, index=descriptors.index, columns=columns)
 
 
-class MultiGPRModel(GPRModel):
-    kernels = [
-        DotProduct() + WhiteKernel(),
-        ConstantKernel() * RBF() + WhiteKernel(),
-        ConstantKernel() * RBF() + WhiteKernel() + DotProduct(),
-        ConstantKernel() * RBF(np.ones(normd_descriptors.shape[1])) + WhiteKernel(),
-        ConstantKernel() * RBF(np.ones(normd_descriptors.shape[1]))
-        + WhiteKernel()
-        + DotProduct(),
-        ConstantKernel() * Matern(nu=1.5) + WhiteKernel(),
-        ConstantKernel() * Matern(nu=1.5) + WhiteKernel() + DotProduct(),
-        ConstantKernel() * Matern(nu=0.5) + WhiteKernel(),
-        ConstantKernel() * Matern(nu=0.5) + WhiteKernel() + DotProduct(),
-        ConstantKernel() * Matern(nu=2.5) + WhiteKernel(),
-        ConstantKernel() * Matern(nu=2.5) + WhiteKernel() + DotProduct(),
-    ]
+# class MultiGPRModel(GPRModel):
+#     kernels = [
+#         DotProduct() + WhiteKernel(),
+#         ConstantKernel() * RBF() + WhiteKernel(),
+#         ConstantKernel() * RBF() + WhiteKernel() + DotProduct(),
+#         ConstantKernel() * RBF(np.ones(normd_descriptors.shape[1])) + WhiteKernel(),
+#         ConstantKernel() * RBF(np.ones(normd_descriptors.shape[1])) + WhiteKernel() + DotProduct(),
+#         ConstantKernel() * Matern(nu=1.5) + WhiteKernel(),
+#         ConstantKernel() * Matern(nu=1.5) + WhiteKernel() + DotProduct(),
+#         ConstantKernel() * Matern(nu=0.5) + WhiteKernel(),
+#         ConstantKernel() * Matern(nu=0.5) + WhiteKernel() + DotProduct(),
+#         ConstantKernel() * Matern(nu=2.5) + WhiteKernel(),
+#         ConstantKernel() * Matern(nu=2.5) + WhiteKernel() + DotProduct(),
+#     ]
 
-    def __init__(self, n_split: int = 10):
-        self.cv = KFold(n_splits=n_split, random_state=2023, shuffle=True)
-        self.best_kernels = self.kernels
-        self.models = {k: None for k in range(len(self.best_kernels))}
-        self.current_objs = {k: None for k in range(len(self.best_kernels))}
-        self.current_stds = {k: None for k in range(len(self.best_kernels))}
-        self.current_obj = None
-        self.current_std = None
-        self.obj_dims = None
+#     def __init__(self, n_split: int = 10):
+#         self.cv = KFold(n_splits=n_split, random_state=2023, shuffle=True)
+#         self.best_kernels = self.kernels
+#         self.models = {k: None for k in range(len(self.best_kernels))}
+#         self.current_objs = {k: None for k in range(len(self.best_kernels))}
+#         self.current_stds = {k: None for k in range(len(self.best_kernels))}
+#         self.current_obj = None
+#         self.current_std = None
+#         self.obj_dims = None
 
-    def init_obj_df(self, descriptors: pd.DataFrame):
-        columns = [f"target_{i}" for i in range(self.obj_dims)]
-        size = descriptors.shape[0]
-        array = np.zeros((size, 1))
-        return pd.DataFrame(array, columns=columns, index=descriptors.index)
+#     def init_obj_df(self, descriptors: pd.DataFrame):
+#         columns = [f"target_{i}" for i in range(self.obj_dims)]
+#         size = descriptors.shape[0]
+#         array = np.zeros((size, 1))
+#         return pd.DataFrame(array, columns=columns, index=descriptors.index)
 
-    def modeling(self):
-        self.models = {
-            k: GaussianProcessRegressor(alpha=0, kernel=kernel)
-            for k, kernel in enumerate(self.best_kernels)
-        }
+#     def modeling(self):
+#         self.models = {
+#             k: GaussianProcessRegressor(alpha=0, kernel=kernel)
+#             for k, kernel in enumerate(self.best_kernels)
+#         }
 
-    def calc_kernel_score(self, kernel, desc, obj) -> float:
-        raise NotImplementedError()
+#     def calc_kernel_score(self, kernel, desc, obj) -> float:
+#         raise NotImplementedError()
 
-    def optimize(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
-        raise NotImplementedError()
+#     def optimize(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
+#         raise NotImplementedError()
 
-    def fit(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
-        if any([model is None for model in self.models.values()]):
-            self.modeling()
-        self.obj_dims = objectives.shape[1]
-        print("Start Training")
-        for k, model in self.models.items():
-            print(f"\r{k + 1}/{len(self.models)}; Kernel={model}", end="")
-            model.fit(descriptors, objectives)
-        print("")
+#     def fit(self, descriptors: pd.DataFrame, objectives: pd.DataFrame):
+#         if any([model is None for model in self.models.values()]):
+#             self.modeling()
+#         self.obj_dims = objectives.shape[1]
+#         print("Start Training")
+#         for k, model in self.models.items():
+#             print(f"\r{k + 1}/{len(self.models)}; Kernel={model}", end="")
+#             model.fit(descriptors, objectives)
+#         print("")
 
-    def predict(self, descriptors: pd.DataFrame):
-        self.current_obj = self.init_obj_df(descriptors)
-        self.current_std = self.init_obj_df(descriptors)
-        num_models = len(self.models)
-        print("Start Predicting")
-        for k, model in self.models.items():
-            print(f"\r{k + 1}/{num_models}; Kernel={model}", end="")
-            estimated_obj, obj_std = model.predict(descriptors, return_std=True)
-            columns = [f"target_{i}" for i in range(self.obj_dims)]
-            self.current_objs[k] = pd.DataFrame(estimated_obj, columns=columns)
-            self.current_stds[k] = pd.DataFrame(obj_std, columns=columns).values
-            self.current_obj += estimated_obj.reshape(-1, 1)
-            self.current_std += obj_std.reshape(-1, 1)
-            gc.collect()
+#     def predict(self, descriptors: pd.DataFrame):
+#         self.current_obj = self.init_obj_df(descriptors)
+#         self.current_std = self.init_obj_df(descriptors)
+#         num_models = len(self.models)
+#         print("Start Predicting")
+#         for k, model in self.models.items():
+#             print(f"\r{k + 1}/{num_models}; Kernel={model}", end="")
+#             estimated_obj, obj_std = model.predict(descriptors, return_std=True)
+#             columns = [f"target_{i}" for i in range(self.obj_dims)]
+#             self.current_objs[k] = pd.DataFrame(estimated_obj, columns=columns)
+#             self.current_stds[k] = pd.DataFrame(obj_std, columns=columns).values
+#             self.current_obj += estimated_obj.reshape(-1, 1)
+#             self.current_std += obj_std.reshape(-1, 1)
+#             gc.collect()
 
-        print("")
-        print("Done!")
-        columns = [f"estimated_{i}" for i in range(self.obj_dims)]
-        self.current_obj = self.current_obj / num_models
-        self.current_std = self.current_std / num_models
-        return self.current_obj.rename(
-            columns={old: new for old, new in zip(self.current_obj.columns, columns)}
-        )
+#         print("")
+#         print("Done!")
+#         columns = [f"estimated_{i}" for i in range(self.obj_dims)]
+#         self.current_obj = self.current_obj / num_models
+#         self.current_std = self.current_std / num_models
+#         return self.current_obj.rename(
+#             columns={old: new for old, new in zip(self.current_obj.columns, columns)}
+#         )
